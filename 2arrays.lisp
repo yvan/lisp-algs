@@ -2,3 +2,38 @@
 (in-package :rtl-user)
 (named-readtables:in-readtable rutils-readtable)
 
+(let ((vec (make-array 3 :initial-contents '(1.0 2.0 3.0))))
+  (print (aref vec 0))
+  (print (? vec 1))
+  (:= (aref vec 2) 4.0)
+  (print (? vec 2))
+  (aref vec 3))
+
+(let ((vec #(1.0 2.0 3.0)))
+  (:= (aref vec 2) nil)
+  (print vec))
+
+(with ((vec (vec 1 2 3))
+       (part (slice vec 2)))
+  (print part)
+  (:= (? part 0) 4)
+  (print part)
+  vec)
+
+(defun map-vec (fn vec)
+  (let ((rez (make-array (length vec))))
+    (dotimes (i (length vec))
+      (:= (aref rez i) (call fn (aref vec i))))
+    rez))
+
+(defun clumsy-filter-vec (pred vec)
+  (let ((rez (make-array (length vec) :fill-pointer t)))
+    (dotimes (i (length vec))
+      (when (call pred (aref vec i))
+        (vector-push (aref vec i) rez)))
+    rez))
+
+(let ((vec (make-array 0 :fill-pointer t :adjustable t)))
+  (dotimes (i 10)
+    (vector-push-extend i vec)
+    (describe vec)))
