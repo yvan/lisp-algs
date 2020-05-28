@@ -1,0 +1,41 @@
+I wanted to rewrite the paragraph explaining log 2 n performance of bin search and probabilities.
+
+the point of the below is to show the pointlessness of the (t (+ pos mid)) early exit condition
+from an algorithmic point of view.
+
+imagine you have a sorted list of n=100 elements in an array you want to bin search for the value 5.
+
+searching this array (log n 2) is probably the number of comparisons you will need to perform against the values to find 5. imagine splitting the array in 2 and searching half of the array each time, but each time you fail to "land on" the value you are searching for (5 in this case). i.e. you trigger (< cur val) or (> cur val) and recurse. "landing on" the value would exit early triggering via (t (+ pos mid)).  
+
+to get the number of comparisons without the final comparison of the bin search we subtract 1 from it giving: (1- (log n 2)). so this is the worst case number of comparisons our algorithm will need to perform if it does not find the element early (this excludes the final "when" based condition, because at that point the array has 1 thing in it). each of these (1- (log n 2)) comparisons has a chance to trigger (t (+ pos mid)) and exit early from bin-search.
+
+to find the probability that this happens, we divide these comparisons by the number of elements. so (/ (1- (log n 2)) n), in other words, the number of times we have the possibility of exiting early divided by the number of elements gives the probability of early exit on an array of size n. this represents the maximum chance we have at an early exit, for simplicity we will refer to it as the early exit probability. if we subtract this probability from 1 then we will get ther probability of *not* exiting early (the probability of having to search through the maximum number of elements). this gives us the formula: (- 1 (/ (1- (log n 2)) n)). this function asymptotically approaches 1. the bigger n gets (n=10, prob=76.7, n=1000, prob=99.1) the bigger our probability of not exiting early and having to search all elements. so as our array grows in size the chances of having an early exit shrink, this means the early exit line (t (+ pos mid)) is kind of a pointless waste of code.
+
+I wanted to understand for myself the overflow conditions in (floor (+ beg end) 2) vs. (+ beg (floor (- end beg) 2))
+
+
+a simple iterative approach will explain why.
+
+if beg = 5 and end = most-positive-fixnum
+
+then the result of floor will always be some number less than half of the most-positive-fixnum, which +5 gives -> not overflow
+
+if beg = most-positive-fixnum and end = 5
+
+then the result of floor will be some negative number whose magnitude is less than have of the most-positive-fixnum. then we get (+ most-positive-fixnum negative-1/2-most-positive) which is just (- most positive-fixnum (/ most-positive-fixnum 2 )), roughly speaking. this corresponds to something less than the max number.
+
+if beg = most-positive-fixnuma end end = most-positive-fixnum
+
+then floor result goes to 0 and (+ most-positive-fixnum 0) is just most-positive-fixnum.
+
+this above will hold for any example of a real number n in R. we could replace 5 with 1000 all the way up to most-positive-fixnum and no overflow or typecast occurs.
+
+inplace, stable, online
+
+inplace -- does the sort operate on pre-allocated memory or does it make copies?
+stable -- do elements that already meet the criteria keep their order in the sorted array
+online -- do we need all the data upfront? or can we keep a sorted set and insert as we go along / get data
+
+
+
+
