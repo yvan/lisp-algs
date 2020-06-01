@@ -160,7 +160,7 @@
 	   (pivot (aref vec (1- (length vec))))) ; select start pivot at the end
       (dotimes (i (1- (length vec))) ; for each item in vec
 	(when (call comp (aref vec i) pivot) ; when the current value is better than pivot
-	  (roatatef (aref vec i) ; swap the current value with the pivoti
+	  (rotatef (aref vec i) ; swap the current value with the pivoti
 		    (aref vec pivot-i))
 	  (:+ pivot-i))) ; otherwise increment pivot-i
       (rotatef (aref vec (1- (length vec))) ; at the end of one run swap pivoti and value at end of the array
@@ -168,3 +168,23 @@
       (quicksort (slice vec 0 pivot-i) comp) ; recurse on the left half of the array,
       (quicksort (slice vec (1+ pivot-i)) comp))) ; recurse on the right half of the array
   vec)
+
+(defun random-vec (size)
+  (let ((vec (make-array size)))
+    (dotimes (i size)
+      (:= (? vec i) (random size)))
+    vec))
+
+(defun print-sort-timings (sort-name sort-fn vec)
+  (let ((vec (copy-seq vec))
+	(len (length vec)))
+    (format t "= ~Asort of random vector (length=~A) =~%"
+	    sort-name len)
+    (time (call sort-fn vec '<))
+    (format t "= ~Asort of sorted vector (length=~A) =~%"
+	    sort-name len)
+    (time (call sort-fn vec '<))
+    (format t "= ~Asort of reverse sorted vector (length=~A) =%"
+	    sort-name len)
+    (time (call sort-fn vec '>))
+    nil))
