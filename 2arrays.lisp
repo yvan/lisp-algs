@@ -117,41 +117,54 @@
       (when (call comp (? variant (1+ i)) (? variant i))
 	(return)))))
 
+
 ;;; (/ (* n (- n 1)) 2)
-;;; why div by 2?
+;;; why div by 2? -- for average case?
+;;; its called this because for each i
+;;; it selects the "best" value to the
+;;; which often means smallest
 (defun selection-sort (vec comp)
-  (dotimes (i (1- (length vec)))
-    (let ((best (aref vec i))
-	  (idx i))
-      (dotimes (j (- (length vec) i 1))
-	(when (call comp (aref vec (+ i j 1)) best)
-	  (:= best (aref vec (+ i j 1))
-	      idx (+ i j 1))))
-      (rotatef (aref vec i) (aref vec idx))))
-  vec)
+  (dotimes (i (1- (length vec)))	; for every element
+    (let ((best (aref vec i)) 		; initialize a "best val" to i
+	  (idx i))			; intialize the idx of best val
+      (dotimes (j (- (length vec) 1 i))	; from the best val to the right of the array
+	(when (call comp (aref vec (+ i 1 j)) best) ; compare the best val and the val
+	  (:= best (aref vec (+ i 1 j))	;if this val is "better" update best
+	      idx (+ i j 1))))		;update idx of best
+      (rotatef (aref vec i) (aref vec idx)))) ;rotate the current value of i (elem were comparing.) with best., if i is in fact the best nothing happens because i is initlized to best
+  vec)					;return sorted vector
 
-;;; best: (- n 1)
-;;; worst: (/ (* n (- n 1) 2)
+;;; (/ (* n (- n 1) 2) or (- n 1)
+;;; (/ (* n (- n 1)) 4)
 (defun insertion-sort (vec comp)
-  (dotimes (i (1- (length vec)))
-    (do ((j i (1- j)))
-	((minusp j))
-      (if (call comp (aref vec (1+ j)) (aref vec j))
-	  (rotatef (aref vec (1+ j)) (aref vec j))
-	  (return))))
+  (dotimes (i (1- (length vec))) ; for each element 
+    (do ((j i (1- j))) ; start at the current value and go back through the left portion
+	((minusp j)) ; once we go past 0 end loop
+      (if (call comp (aref vec (1+ j)) (aref vec j)) ; starting with the first right value, check to see if its better
+	  (rotatef (aref vec (1+ j)) (aref vec j)) ; if its better rotate the two, now make sure its properly sorted by comparing the new value with the one before it.
+	  (return)))) ; if not break the inner loop
   vec)
 
+;;; pi hovers behind and keeps up with values that are being
+;;; sorted based on the pivot, if a value is encountered that is = or greater
+;;; then the pi stays put until another lower than pivot value is found, which
+;;; then gets swapped w/ the pi. wherever pi lands at the end of the array is
+;;; either greater or equal to the pivot. so we swap that end pivot with the
+;;; pi post dotimes loop, then we recursively call up to pivot i (which is
+;;; for sure sorted based on the end pivot), this represents the left half
+;;; and we also recursively call on the right half of the array.
+;;; repeat and sort the array
 (defun quicksort (vec comp)
-  (when (> (length vec) 1)
-    (with ((pivot-i 0)
-	   (pivot (aref vec (1- (length vec)))))
-      (dotimes (i (1- (length vec)))
-	(when (call comp (aref vec i) pivot)
-	  (roatatef (aref vec i)
+  (when (> (length vec) 1) ; if we have more than 1 thing
+    (with ((pivot-i 0) ; create a pivoti starting at 0.
+	   (pivot (aref vec (1- (length vec))))) ; select start pivot at the end
+      (dotimes (i (1- (length vec))) ; for each item in vec
+	(when (call comp (aref vec i) pivot) ; when the current value is better than pivot
+	  (roatatef (aref vec i) ; swap the current value with the pivoti
 		    (aref vec pivot-i))
-	  (:+ pivot-i)))
-      (rotatef (aref vec (1- (length vec)))
+	  (:+ pivot-i))) ; otherwise increment pivot-i
+      (rotatef (aref vec (1- (length vec))) ; at the end of one run swap pivoti and value at end of the array
 	       (aref vec pivot-i))
-      (quicksort (slice vec 0 pivot-i) comp)
-      (quicksort (slice vec (1+ pivot-i)) comp)))
+      (quicksort (slice vec 0 pivot-i) comp) ; recurse on the left half of the array,
+      (quicksort (slice vec (1+ pivot-i)) comp))) ; recurse on the right half of the array
   vec)
