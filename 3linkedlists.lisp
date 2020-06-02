@@ -23,14 +23,14 @@
 (defstruct (list-cell2 (:include list-cell))
   prev)
 
-(defun our-cons2 (data list)
-  (when (null list) (:= list (make-our-own-list)))
+(defun our-cons2 (data lst)
+  (when (null lst) (:= lst (make-our-own-list)))
   (let ((new-head (make-list-cell2
 		   :data data
-		   :next @list.head)))
-    (when @list.head
-      (:= @list.head.prev new-head))
+		   :next @lst.head)))
+    (when @lst.head
+      (:= @lst.head.prev new-head))
     (make-our-own-list
      :head new-head
-     :tail @list.tail
-     :size (1+ @list.size))))
+     :tail @lst.tail
+     :size (1+ @lst.size))))
